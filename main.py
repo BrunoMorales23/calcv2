@@ -1,20 +1,11 @@
-import os
+from initialize import *
+from settings import *
 
-def getdircontent():
-    i_list = []
+settings.init()
+files = getDirContent(settings.inputPath)
 
-    files = os.listdir("./inputs/")
-    for i in range(len(files)):
-        file = files[i]
-        if file.count(".docx") == 0:
-            print(f"Este doc debe ser eliminado: {file}")
-            i_list.append(i)
-
-    i_list.sort(reverse=True)
-    for i in i_list:
-        files.pop(i)
-
-    print(files)
-    return files
-
-getdircontent()
+for file in files:
+    print(f"Archivo actual: {settings.inputPath}{file}")
+    current_dir = settings.inputPath+file
+    content = pdfToText(settings.tesseractPath, settings.popplerPath, current_dir)
+    print(content)
