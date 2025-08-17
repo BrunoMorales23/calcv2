@@ -1,5 +1,6 @@
 import os
-from colorama import init
+from colorama import Fore, init
+import datetime
 
 init(autoreset=True)
 
@@ -18,3 +19,18 @@ def getDirContent(dir):
 
     print(files)
     return files
+
+def createDir(logPath):
+    today = datetime.datetime.now()
+    path = os.path.join(logPath, str(today.year), str(today.month), str(today.day), "/")
+    path = path.replace("\\","/")
+    #try:
+    os.mkdir(path)
+    print(Fore.GREEN +"------------------------------------")
+    print(Fore.GREEN +"Directorio creado correctamente.")
+    #except FileExistsError:
+    #    pass
+    #except:
+    #    print(Fore.RED +"------------------------------------")
+    #    print(Fore.RED +"No se pudo crear el directorio para la ejecución")
+    return

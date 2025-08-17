@@ -1,3 +1,4 @@
 env/
 inputs/
 poppler-24.08.0/
+*.pyc
