@@ -1,4 +1,6 @@
 env/
 inputs/
+logs/
 poppler-24.08.0/
-*.pyc
+initialize/__pycache__/
+/settings/.env
