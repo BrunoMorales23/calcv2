@@ -2,5 +2,6 @@ env/
 inputs/
 logs/
 poppler-24.08.0/
-initialize/__pycache__/
 /settings/.env
+**/*/__pycache__*/**
+gemini/

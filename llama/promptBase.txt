@@ -8,8 +8,4 @@ Debes responder únicamente en base a la siguiente información recibida: {conte
 
 Y a la siguiente pregunta del usuario: {question}
 
-📌 Instrucciones obligatorias:
-- Identifica la cantidad de aplicaciones utilizadas y/o mencionadas a lo largo del contenido (Las aplicaciones se encuentran en el punto 2.2, en donde se mencionan).
-- Identifica si es necesario hacer reporte de la operación (El reporte se menciona sobre el final del documento, sugiriendo el envío de un documento excel al cliente o al equipo RPA).
-
 Tu respuesta debe limitarse únicamente a lo solicitado. Todo lo que exceda eso debe ser omitido.
