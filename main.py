@@ -16,9 +16,9 @@ settings.init()
 work_queue = queue.Queue()
 current_log_path = initialize.createDir(settings.logsPath)
 current_log = logs.createNewLog(current_log_path)
-ollama = llama.Llama()
-
-files = getDirContent(settings.inputPath)
+try:
+    ollama = llama.Llama()
+    files = getDirContent(settings.inputPath)
 
 for file in files:
     print(f"Archivo actual: {settings.inputPath}{file}")
@@ -44,12 +44,12 @@ while work_queue.size() != 0:
      break
     #------------------------------------------------------------
 
-    #Gemini
-    #------------------------------------------------------------
-    #gemini_content = gemini.executePrompt(pdf_path=item_path, prompt="Detecta los siguientes puntos y responde de la forma más breve posible, ya sea respondiento por 'Si' o 'No', o bien, declarando la cantidad (en números) de elementos que cumplen con la condición:" \
-    #"- ¿Es necesario hacer reporte de ejecución?" \
-    #"- ¿Cuántas aplicaciones/aplicativos/programas son requeridos en la automatización?" \
-    #"- ")
+#     #Gemini
+#     #------------------------------------------------------------
+#     #gemini_content = gemini.executePrompt(pdf_path=item_path, prompt="Detecta los siguientes puntos y responde de la forma más breve posible, ya sea respondiento por 'Si' o 'No', o bien, declarando la cantidad (en números) de elementos que cumplen con la condición:" \
+#     #"- ¿Es necesario hacer reporte de ejecución?" \
+#     #"- ¿Cuántas aplicaciones/aplicativos/programas son requeridos en la automatización?" \
+#     #"- ")
 
     #regex_flag = re.search("^¿*?$", gemini_content)
     #if regex_flag == True:
