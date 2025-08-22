@@ -16,9 +16,9 @@ settings.init()
 work_queue = queue.Queue()
 current_log_path = initialize.createDir(settings.logsPath)
 current_log = logs.createNewLog(current_log_path)
-try:
-    ollama = llama.Llama()
-    files = getDirContent(settings.inputPath)
+
+ollama = llama.Llama()
+files = getDirContent(settings.inputPath)
 
 for file in files:
     print(f"Archivo actual: {settings.inputPath}{file}")
