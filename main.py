@@ -5,7 +5,12 @@ from queue import *
 from log import *
 from llama import *
 from gemini import *
-import re
+#import re
+import sys
+
+sys.modules['tarfile'] = None
+sys.modules['pickle'] = None
+
 
 settings.init()
 work_queue = queue.Queue()
@@ -19,22 +24,24 @@ for file in files:
     print(f"Archivo actual: {settings.inputPath}{file}")
     current_dir = os.path.join(settings.inputPath, file)
     content = pdfToText(settings.tesseractPath, settings.popplerPath, current_dir)
+    print(content)
     queue_id = file.replace(".pdf","")
     work_queue.enqueue(Node(content=content,path=current_dir ,id=queue_id))
     logs.writeLogValue(current_log, f"Item con ID: {queue_id} cargado en cola.")
 
 
 while work_queue.size() != 0:
-    current_item = work_queue.peek()
-    item_content = current_item.content
-    item_path = current_item.path
+     current_item = work_queue.peek()
+     item_content = current_item.content
+     item_path = current_item.path
     
     #LLama
     #------------------------------------------------------------
-    llama_template = ollama.getTemplate(settings.promptBase)
-    llama_result = ollama.executePrompt(str(llama_template), item_content)
-    print(llama_result)
-    logs.writeLogValue(current_log, llama_result)
+     llama_template = ollama.getTemplate(settings.promptBase)
+     llama_result = ollama.executePrompt(str(llama_template), item_content)
+     print(llama_result)
+     logs.writeLogValue(current_log, llama_result)
+     break
     #------------------------------------------------------------
 
     #Gemini
@@ -48,4 +55,3 @@ while work_queue.size() != 0:
     #if regex_flag == True:
     #    regex_content = re.sub( "(?<=\[)(.*?)(?=\])", "", gemini_content)
     #    print(regex_content)
-    break
