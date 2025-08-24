@@ -6,3 +6,6 @@ poppler-25.07.0/
 /settings/.env
 **/*/__pycache__*/**
 gemini/
+calc/*/__pycache__
+calc/*/migrations
+calc/calc/settings.py
