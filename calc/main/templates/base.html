@@ -3,11 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}TEST{% endblock %}</title>
+    <title>{% block title %}{% endblock %}</title>
 </head>
 <body>
-    <h1>TEST H1!</h1>
+    <h1>Automatizador de documentación.</h1>
     <div>
+        <p>Bienvenido al automatizador. Por favor, disponga del PDD de su proceso a automatizar.</p>
+          <form action="uploaded/" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="archivo" accept=".pdf" />
+            <br><br>
+            <button type="submit">Enviar</button>
+        </form>
         {% block content %} {% endblock %}
     </div>
 </body>
