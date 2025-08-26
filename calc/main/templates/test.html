@@ -3,5 +3,9 @@
 <p>Home Content TEST Test</p>
 <h1>SALIO BIEN</h1>
 
-<p> {{ filecontent }} </p>
+<p> {{ filename }} </p>
+<form action="{% url 'upload' %}" method="post">
+    {% csrf_token %}
+    <button name="action" value="iniciar">Iniciar</button>
+</form>
 {% endblock %}

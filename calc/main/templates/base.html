@@ -9,7 +9,7 @@
     <h1>Automatizador de documentación.</h1>
     <div>
         <p>Bienvenido al automatizador. Por favor, disponga del PDD de su proceso a automatizar.</p>
-          <form action="uploaded/" method="post" enctype="multipart/form-data">
+          <form action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
             {% csrf_token %}
             <input type="file" name="archivo" accept=".pdf" />
             <br><br>

@@ -9,3 +9,4 @@ gemini/
 calc/*/__pycache__
 calc/*/migrations
 calc/calc/settings.py
+calc/media/*
