@@ -46,7 +46,7 @@ def core():
             os.remove(item_path)
             #crear lógica de excepción
         break
-
+    del ollama
     return llama_result
         #------------------------------------------------------------
 
@@ -61,3 +61,15 @@ def core():
         #if regex_flag == True:
         #    regex_content = re.sub( "(?<=\[)(.*?)(?=\])", "", gemini_content)
         #    print(regex_content)
+
+def setEstimation(pathPrompt, content):
+    if pathPrompt == "1":
+        pathPrompt = settings.estimation_prompt
+    ollama = llama.Llama()
+    with open(pathPrompt, "r", encoding="utf-8") as f:
+        queryValue = f.read()
+        ollama.modifyQuery(queryValue)
+    llama_template = ollama.getTemplate(settings.promptBase)
+    llama_result = ollama.executePrompt(str(llama_template) + queryValue, content)
+    del ollama
+    return llama_result

@@ -16,3 +16,7 @@ class Llama:
         chain = prompt | self.model
         result = chain.invoke({"content": item_content, "question": self.query})
         return result
+    
+    def modifyQuery(self, query):
+        self.query = query
+        return self

@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
 from django.urls import reverse
 from django.contrib import messages
-from calcScripts.main import core
+from calcScripts.main import core, setEstimation
 
 # Create your views here.
 def home(request):
@@ -17,7 +17,8 @@ def upload_file(request):
         print(filename)
         if filename != None:
             result = core()
-            return render(request, "result.html", {'resultado' : result})
+            estimation = setEstimation("1", result)
+            return render(request, "result.html", {'resultado' : result, 'resultado2' : estimation})
         return render(request, "test.html", {"filename": filename})
     elif request.method == "POST":
         action = request.POST.get("action")
