@@ -7,6 +7,7 @@ urlpatterns = [
     path("", views.home, name="home"),
     path("test/", views.test, name="test"),
     path("uploaded/", views.upload_file, name="upload"),
+    path("uploaded/<str:filename>/", views.upload_file, name="upload"),
     path("loading/", views.loading, name="loading")
 ]
 

@@ -13,7 +13,7 @@
             {% csrf_token %}
             <input type="file" name="archivo" accept=".pdf" />
             <br><br>
-            <button type="submit">Enviar</button>
+            <button type="submit" name="action" value="iniciar">Enviar</button>
         </form>
         {% block content %} {% endblock %}
     </div>

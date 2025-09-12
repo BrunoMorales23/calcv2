@@ -10,3 +10,6 @@ calc/*/__pycache__
 calc/*/migrations
 calc/calc/settings.py
 calc/media/*
+calc/calcScripts/settings/.env
+calc/calcScripts/inputs/
+calc/calcScripts/*/__pycache__/
