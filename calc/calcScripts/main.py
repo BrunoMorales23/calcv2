@@ -15,9 +15,8 @@ def core():
 
     settings.init()
     work_queue = queue.Queue()
-    current_log_path = initialize.createDir(settings.logsPath)
-    current_log = logs.createNewLog(current_log_path)
 
+    log_path = setLog()
     ollama = llama.Llama()
     files = getDirContent(settings.inputPath)
 
@@ -25,28 +24,34 @@ def core():
         print(f"Archivo actual: {settings.inputPath}{file}")
         current_dir = os.path.join(settings.inputPath, file)
         content = pdfToText(settings.tesseractPath, settings.popplerPath, current_dir)
-        print(content)
+        print("--- OCR Run Finished ---")
         queue_id = file.replace(".pdf","")
         work_queue.enqueue(Node(content=content,path=current_dir ,id=queue_id))
-        logs.writeLogValue(current_log, f"Item con ID: {queue_id} cargado en cola.")
-
-
-    while work_queue.size() != 0:
-        current_item = work_queue.peek()
-        item_content = current_item.content
-        item_path = current_item.path
+        writeLog(log_path, message=f"Item con ID: {queue_id} cargado en cola.")
+    
+        while work_queue.size() != 0:
+            current_item = work_queue.peek()
+            item_content = current_item.content
+            item_path = current_item.path
+            item_id = current_item.id
         
         #LLama
         #------------------------------------------------------------
         llama_template = ollama.getTemplate(settings.promptBase)
         llama_result = ollama.executePrompt(str(llama_template), item_content)
-        print(llama_result)
-        logs.writeLogValue(current_log, llama_result)
+        print(f"{item_id}--- Llama Run Finished ---")
+        writeLog(log_path, message=llama_result)
         if os.path.exists(item_path):
             os.remove(item_path)
             #crear lógica de excepción
+
+        llama_result = setEstimation("1", llama_result)
+        writeLog(log_path, message=llama_result)
+        llama_result = setEstimation("2", llama_result)
+        writeLog(log_path, message=llama_result)
         break
     del ollama
+
     return llama_result
         #------------------------------------------------------------
 
@@ -65,6 +70,8 @@ def core():
 def setEstimation(pathPrompt, content):
     if pathPrompt == "1":
         pathPrompt = settings.estimation_prompt
+    elif pathPrompt == "2":
+        pathPrompt = settings.horas_prompt
     ollama = llama.Llama()
     with open(pathPrompt, "r", encoding="utf-8") as f:
         queryValue = f.read()
@@ -73,3 +80,13 @@ def setEstimation(pathPrompt, content):
     llama_result = ollama.executePrompt(str(llama_template) + queryValue, content)
     del ollama
     return llama_result
+
+
+#Se separan estas funciones a fin de poder ser utilizadas en casos X desde views.py
+def setLog():
+    current_log_path = initialize.createDir(settings.logsPath)
+    current_log = logs.createNewLog(current_log_path)
+    return current_log
+
+def writeLog(current_log, message):
+    logs.writeLogValue(current_log, message)
