@@ -23,11 +23,12 @@ Si un paso contiene múltiples sub-acciones dentro de la misma instrucción, asi
 
 Si un paso es simple y directo, asigna el valor inferior del rango.
 
-El formato debe ser estrictamente:
+El formato debe ser:
 
-Paso 1 [Nivel 2]: Descripción clara del paso — Estimación: 4 horas
-Paso 2 [Nivel 4]: Descripción clara del paso — Estimación: 36 horas
+Paso 1 [Nivel 2]: * — Estimación: **
+Paso 2 [Nivel 4]: * — Estimación: **
 
+Donde * representa el nombre del paso, y ** representa la cantidad de horas.
 
-Input: lista de pasos con niveles de complejidad.
-Output esperado: lista de pasos numerados con nivel de complejidad y su estimación de horas.
+Input: {content}
+Output esperado: lista de pasos numerados con su nivel de complejidad, siguiendo estrictamente el formato indicado.

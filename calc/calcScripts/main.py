@@ -19,7 +19,7 @@ def core():
     work_queue = queue.Queue()
 
     log_path = setLog()
-    ollama = llama.Llama()
+    #ollama = llama.Llama()
     files = getDirContent(settings.inputPath)
 
     for file in files:
@@ -38,6 +38,7 @@ def core():
         item_id = current_item.id
         #LLama
         #------------------------------------------------------------
+        ollama = llama.Llama(content=item_content)
         llama_template = ollama.getTemplate(settings.promptBase)
         llama_result = ollama.executePrompt(str(llama_template), item_content)
         print(f"{item_id}--- Llama Run Finished ---")
@@ -53,8 +54,9 @@ def core():
 
         writeOutput(llama_result, item_id)
         writeLog(log_path, message=f"Estimación PDD {item_id}.xlsx --- Creado")
+        del ollama
         break
-    del ollama
+    #del ollama
 
     return llama_result
         #------------------------------------------------------------
@@ -76,11 +78,11 @@ def setEstimation(pathPrompt, content):
         pathPrompt = settings.estimation_prompt
     elif pathPrompt == "2":
         pathPrompt = settings.horas_prompt
-    ollama = llama.Llama()
+    ollama = llama.Llama(content=content)
     with open(pathPrompt, "r", encoding="utf-8") as f:
         queryValue = f.read()
         ollama.modifyQuery(queryValue)
-    llama_template = ollama.getTemplate(settings.promptBase)
+    llama_template = ollama.getTemplate(settings.estimation_prompt)
     llama_result = ollama.executePrompt(str(llama_template) + queryValue, content)
     del ollama
     return llama_result
@@ -103,13 +105,16 @@ def writeOutput(llama_result, queue_itemID):
     workSheet = workBook.active
 
     splittedLines = [p.strip() for p in llama_result.split("Paso") if p.strip()]
-    regex_tittle = r"\]: (.*?) — Estimación"
+    regex_tittle = r"\]: (.*?) . Estimación:"
     regex_horas = r"Estimación:\s*(.*?)(?:\s*Paso|$)"
 
     for line in splittedLines:
         task_tittle = re.findall(regex_tittle, line)
+        if task_tittle == None or task_tittle == "":
+            regex_tittle = r"\]:\s*(.*?)\s*\. Estimación:"
+            task_tittle = re.findall(regex_tittle, line)
         task_time = re.findall(regex_horas, line)
-        print(task_time)
+        print(task_tittle)
 
         fill = PatternFill(start_color="E6E6E6", end_color="E6E6E6", fill_type="solid")
 
