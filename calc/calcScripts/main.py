@@ -7,6 +7,8 @@ from .llama import *
 #from gemini import *
 #import re
 import sys
+from openpyxl import Workbook, load_workbook
+import re
 
 def core():
     sys.modules['tarfile'] = None
@@ -29,12 +31,11 @@ def core():
         work_queue.enqueue(Node(content=content,path=current_dir ,id=queue_id))
         writeLog(log_path, message=f"Item con ID: {queue_id} cargado en cola.")
     
-        while work_queue.size() != 0:
-            current_item = work_queue.peek()
-            item_content = current_item.content
-            item_path = current_item.path
-            item_id = current_item.id
-        
+    while work_queue.size() != 0:
+        current_item = work_queue.peek()
+        item_content = current_item.content
+        item_path = current_item.path
+        item_id = current_item.id
         #LLama
         #------------------------------------------------------------
         llama_template = ollama.getTemplate(settings.promptBase)
@@ -49,6 +50,9 @@ def core():
         writeLog(log_path, message=llama_result)
         llama_result = setEstimation("2", llama_result)
         writeLog(log_path, message=llama_result)
+
+        writeOutput(llama_result, item_id)
+        writeLog(log_path, message=f"Estimación PDD {item_id}.xlsx --- Creado")
         break
     del ollama
 
@@ -90,3 +94,24 @@ def setLog():
 
 def writeLog(current_log, message):
     logs.writeLogValue(current_log, message)
+
+def writeOutput(llama_result, queue_itemID):
+
+    current_row = 3
+    workBook = load_workbook(settings.template_xlsx_output)
+    workSheet = workBook.active
+
+    splittedLines = [p.strip() for p in llama_result.split("Paso") if p.strip()]
+    regex_tittle = r"\]: (.*?) — Estimación"
+    regex_horas = r"Estimación:\s*(.*?)\s*Paso"
+
+    for line in splittedLines:
+        task_tittle = re.findall(regex_tittle, line)
+        task_time = re.findall(regex_horas, line)
+
+        workSheet[f"B{current_row}"] = task_tittle
+        workSheet[f"C{current_row}"] = task_time
+
+        current_row += 1
+
+    workBook.save(f"Estimación PDD {queue_itemID}.xlsx")

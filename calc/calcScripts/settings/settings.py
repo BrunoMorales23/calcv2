@@ -6,7 +6,7 @@ dotenv_path = join(dirname(__file__), '.env')
 load_dotenv()
 
 def init():
-    global popplerPath, inputPath, tesseractPath, logsPath, promptBase, gemini_api_key, estimation_prompt, horas_prompt
+    global popplerPath, inputPath, tesseractPath, logsPath, promptBase, gemini_api_key, estimation_prompt, horas_prompt, template_xlsx_output, outputPath
     tesseractPath = os.environ.get("TESSERACT_EXE")
     popplerPath = os.environ.get("POPPLER_PATH")
     inputPath = os.environ.get("INPUT_PATH")
@@ -15,3 +15,5 @@ def init():
     gemini_api_key = os.environ.get("GEMINI_API_KEY")
     estimation_prompt = os.environ.get("PROMPT_ESTIMATION")
     horas_prompt = os.environ.get("PROMPT_HORAS")
+    template_xlsx_output = os.environ.get("TEMPLATE_OUTPUT")
+    outputPath = os.environ.get("OUTPUT_PATH")
