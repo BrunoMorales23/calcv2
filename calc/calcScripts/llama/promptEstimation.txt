@@ -29,7 +29,7 @@ Considerar para la dificultad:
 
 Nivel 1: lógica posible de resolver dentro de Blue Prism (cálculos generales, uso de Excel, envío de correos y reportería).
 
-Nivel 2: mapeo de interfaces Web o aplicativos Web. Trabajos con SAP con menos de 2 transacciones.
+Nivel 2: mapeo de interfaces Web o aplicativos Web. Trabajos con SAP con menos de 2 transacciones, envío de correos y reportería.
 
 Nivel 3: trabajos con SAP con más de 3 transacciones.
 
