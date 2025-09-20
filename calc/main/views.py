@@ -3,10 +3,14 @@ from django.core.files.storage import FileSystemStorage
 from django.urls import reverse
 from django.contrib import messages
 from calcScripts.main import *
+#from .models import workQueue
 
 # Create your views here.
 def home(request):
-    return render(request, "home.html")
+    if request.method == "GET":
+        bbdd_content = workQueue.objects.all().values("id_value", "status", "log").order_by('-id')
+        print(bbdd_content)
+    return render(request, "home.html", {"wq": bbdd_content})
 
 def test(request):
     return render(request, "test.html")

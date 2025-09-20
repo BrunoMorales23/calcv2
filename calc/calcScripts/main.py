@@ -10,10 +10,11 @@ import sys
 from openpyxl import load_workbook
 import re
 from openpyxl.styles import Font, PatternFill, Alignment
+from main.models import workQueue
+
 def core():
     sys.modules['tarfile'] = None
     sys.modules['pickle'] = None
-
 
     settings.init()
     work_queue = queue.Queue()
@@ -29,6 +30,7 @@ def core():
         print("--- OCR Run Finished ---")
         queue_id = file.replace(".pdf","")
         work_queue.enqueue(Node(content=content,path=current_dir ,id=queue_id))
+        workQueue.objects.create(id_value=queue_id, path_value=current_dir, content=content)
         writeLog(log_path, message=f"Item con ID: {queue_id} cargado en cola.")
     
     while work_queue.size() != 0:
@@ -36,42 +38,33 @@ def core():
         item_content = current_item.content
         item_path = current_item.path
         item_id = current_item.id
+        workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Pendiente").update(log="Inicializando Ejecución",status="Ejecutando")
+
         #LLama
         #------------------------------------------------------------
         ollama = llama.Llama(content=item_content)
         llama_template = ollama.getTemplate(settings.promptBase)
         llama_result = ollama.executePrompt(str(llama_template), item_content)
         print(f"{item_id}--- Llama Run Finished ---")
+        workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Ejecutando").update(log="Finalizado el Análisis por IA")
         writeLog(log_path, message=llama_result)
         if os.path.exists(item_path):
             os.remove(item_path)
             #crear lógica de excepción
 
-        llama_result = setEstimation("1", llama_result)
-        writeLog(log_path, message=llama_result)
-        llama_result = setEstimation("2", llama_result)
-        writeLog(log_path, message=llama_result)
+        #llama_result = setEstimation("1", llama_result)
+        #writeLog(log_path, message=llama_result)
+        #llama_result = setEstimation("2", llama_result)
+        #writeLog(log_path, message=llama_result)
 
         writeOutput(llama_result, item_id)
+        #current_bbdd_item = workQueue.objects.filter(id_value=item_id, path_value=item_path, status=)
+        workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Ejecutando").update(log="Exportación de datos Completada", status="Completado")
         writeLog(log_path, message=f"Estimación PDD {item_id}.xlsx --- Creado")
         del ollama
         break
-    #del ollama
 
     return llama_result
-        #------------------------------------------------------------
-
-    #     #Gemini
-    #     #------------------------------------------------------------
-    #     #gemini_content = gemini.executePrompt(pdf_path=item_path, prompt="Detecta los siguientes puntos y responde de la forma más breve posible, ya sea respondiento por 'Si' o 'No', o bien, declarando la cantidad (en números) de elementos que cumplen con la condición:" \
-    #     #"- ¿Es necesario hacer reporte de ejecución?" \
-    #     #"- ¿Cuántas aplicaciones/aplicativos/programas son requeridos en la automatización?" \
-    #     #"- ")
-
-        #regex_flag = re.search("^¿*?$", gemini_content)
-        #if regex_flag == True:
-        #    regex_content = re.sub( "(?<=\[)(.*?)(?=\])", "", gemini_content)
-        #    print(regex_content)
 
 def setEstimation(pathPrompt, content):
     if pathPrompt == "1":

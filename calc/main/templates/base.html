@@ -17,5 +17,42 @@
         </form>
         {% block content %} {% endblock %}
     </div>
+
+    <div>
+        <table>
+            <h1>Cola de Trabajo</h1>
+            <tr>
+                <th>ID</th>
+                <th>Status</th>
+                <th>Log</th>
+            </tr>
+
+            {% for q in wq %}
+            <tr>
+                <td>{{q.id_value}}</td>
+                <td>{{q.status}}</td>
+                <td>{{q.log}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
+
+    <div>
+        <h1>Caso Actual</h1>
+        <table>
+            <tr>
+                <th>ID</th>
+                <th>Log</th>
+                <th>Time</th>
+            </tr>
+            {% for q in currentItem %}
+            <tr>
+                <td>{{q.id_value}}</td>
+                <td>{{q.status}}</td>
+                <td>{{q.log}}</td>
+            </tr>
+            {% endfor %}
+        </table>
+    </div>
 </body>
 </html>
