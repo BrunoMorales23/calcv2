@@ -3,6 +3,7 @@ from django.core.files.storage import FileSystemStorage
 from calcScripts.main import *
 from django.conf import settings as django_settings
 
+
 request_flush_required = True
 
 def home(request):
@@ -29,16 +30,19 @@ def home(request):
                         print("CASE 1")
                         request.session["item_content"], request.session["llama_operation_step"] = ocrExecution(request.session["item_id"], request.session["item_path"])
                         request.session["bbdd_current_item"] = getCurrentItem(log="Inicializando Ejecución", status="Ejecutando")
+                        #return redirect("home")
                         return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
                     case 2:
                         print("CASE 2")
                         request.session["llama_result"], request.session["llama_operation_step"] = llamaExecution(request.session["item_id"], request.session["item_path"], request.session["item_content"])
                         request.session["bbdd_current_item"] = getCurrentItem(log="Finalizado el Análisis por IA", status="Ejecutando")
+                        #return redirect("home")
                         return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
                     case 3:
                         print("CASE 3")
                         request.session["llama_operation_step"] = writeOutput(request.session["llama_result"], request.session["item_id"], request.session["item_path"])
                         request.session["bbdd_current_item"] = getCurrentItem(log="Exportación de datos Completada", status="Completado")
+                        #return redirect("home")
                         return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
                     case _:
                         raise Exception("Out of Range: 'llama_operation_step' phase.")
@@ -46,6 +50,9 @@ def home(request):
             request.session["work_queue"] = initializeScripts()
             request.session["initialize_flag"] = False
         request.session["bbdd_content"] = list(workQueue.objects.all().values("id_value", "status", "log").order_by('-id'))
+        match request.session["llama_operation_step"]:
+                case 1,2,3:
+                    return redirect("home")
         return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
     
     elif request.method == "POST":
@@ -105,4 +112,5 @@ def startUpVars(request):
         request.session["llama_result"] = None
     if "bbdd_content" not in request.session:
         request.session["bbdd_content"] = list(workQueue.objects.all().values("id_value", "status", "log").order_by('-id'))
+    print("--- Session Variables Initialized ---")
     

@@ -9,6 +9,8 @@ from openpyxl import load_workbook
 import re
 from openpyxl.styles import Font, PatternFill, Alignment
 from main.models import workQueue
+from django.core.serializers.json import DjangoJSONEncoder
+import json
 
 def initializeScripts():
     sys.modules['tarfile'] = None
@@ -105,9 +107,7 @@ def writeOutput(llama_result, item_id, item_path):
     return 0
 
 def getCurrentItem(log, status):
-    return list(workQueue.objects.filter(
-        log=log, status=status
-    ).values("id_value", "status", "log", "updated_at").order_by("-updated_at"))
+    return json.loads(json.dumps(list(workQueue.objects.filter(log=log, status=status).values("id_value", "status", "log", "updated_at").order_by("-updated_at")),cls=DjangoJSONEncoder))
 
 #Se separan estas funciones a fin de poder ser utilizadas en casos X desde views.py
 # def setLog():
