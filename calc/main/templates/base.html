@@ -9,11 +9,11 @@
     <h1>Automatizador de documentación.</h1>
     <div>
         <p>Bienvenido al automatizador. Por favor, disponga del PDD de su proceso a automatizar.</p>
-          <form action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
+          <form action="{% url 'home' %}" method="post" enctype="multipart/form-data" id="uploadForm">
             {% csrf_token %}
-            <input type="file" name="archivo" accept=".pdf" />
+            <input type="file" name="archivo" accept=".pdf" multiple id="fileInput"/>
             <br><br>
-            <button type="submit" name="action" value="iniciar">Enviar</button>
+            <button type="submit" name="action" value="cargarWQ">Enviar</button>
         </form>
         {% block content %} {% endblock %}
     </div>
@@ -37,6 +37,11 @@
         </table>
     </div>
 
+    <form action="{% url 'home' %}" method="post">
+        {% csrf_token %}
+            <button type="submit" name="action" value="vaciarWQ">Vaciar Cola de Trabajo</button>
+        </form>
+    {% for q in currentItem %}
     <div>
         <h1>Caso Actual</h1>
         <table>
@@ -45,14 +50,24 @@
                 <th>Log</th>
                 <th>Time</th>
             </tr>
-            {% for q in currentItem %}
+            
             <tr>
                 <td>{{q.id_value}}</td>
                 <td>{{q.status}}</td>
                 <td>{{q.log}}</td>
             </tr>
-            {% endfor %}
         </table>
     </div>
+    {% endfor %}
+
+
+
+    <form action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="file" name="archivo" accept=".pdf" multiple/>
+            <br><br>
+            <button type="submit" name="action" value="iniciar">Enviar</button>
+        </form>
 </body>
+
 </html>

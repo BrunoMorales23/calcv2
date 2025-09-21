@@ -12,32 +12,38 @@ import re
 from openpyxl.styles import Font, PatternFill, Alignment
 from main.models import workQueue
 
-def core():
+def initializeScripts():
     sys.modules['tarfile'] = None
     sys.modules['pickle'] = None
-
     settings.init()
     work_queue = queue.Queue()
-
     log_path = setLog()
-    #ollama = llama.Llama()
-    files = getDirContent(settings.inputPath)
+    return work_queue, log_path
 
-    for file in files:
-        print(f"Archivo actual: {settings.inputPath}{file}")
-        current_dir = os.path.join(settings.inputPath, file)
-        content = pdfToText(settings.tesseractPath, settings.popplerPath, current_dir)
-        print("--- OCR Run Finished ---")
-        queue_id = file.replace(".pdf","")
-        work_queue.enqueue(Node(content=content,path=current_dir ,id=queue_id))
-        workQueue.objects.create(id_value=queue_id, path_value=current_dir, content=content)
-        writeLog(log_path, message=f"Item con ID: {queue_id} cargado en cola.")
-    
+def wqUpload(work_queue, log_path, file_name, file_path):
+    #ollama = llama.Llama()
+    #files = getDirContent(settings.inputPath)
+
+    #for file in files:
+    print(f"Archivo actual: {settings.inputPath}{file_name}")
+    #current_dir = os.path.join(settings.inputPath, file)
+
+    queue_id = file_name.replace(".pdf","")
+    work_queue.enqueue(Node(path=file_path ,id=queue_id))
+    workQueue.objects.create(id_value=queue_id, path_value=file_path)
+    writeLog(log_path, message=f"Item con ID: {queue_id} cargado en cola.")
+
+
+def llamaOperation(work_queue):   
     while work_queue.size() != 0:
         current_item = work_queue.peek()
-        item_content = current_item.content
         item_path = current_item.path
         item_id = current_item.id
+
+        item_content = pdfToText(settings.tesseractPath, settings.popplerPath, item_path)
+        print("--- OCR Run Finished ---")
+
+
         workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Pendiente").update(log="Inicializando Ejecución",status="Ejecutando")
 
         #LLama
@@ -47,7 +53,7 @@ def core():
         llama_result = ollama.executePrompt(str(llama_template), item_content)
         print(f"{item_id}--- Llama Run Finished ---")
         workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Ejecutando").update(log="Finalizado el Análisis por IA")
-        writeLog(log_path, message=llama_result)
+        #writeLog(log_path, message=llama_result)
         if os.path.exists(item_path):
             os.remove(item_path)
             #crear lógica de excepción
@@ -60,7 +66,7 @@ def core():
         writeOutput(llama_result, item_id)
         #current_bbdd_item = workQueue.objects.filter(id_value=item_id, path_value=item_path, status=)
         workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Ejecutando").update(log="Exportación de datos Completada", status="Completado")
-        writeLog(log_path, message=f"Estimación PDD {item_id}.xlsx --- Creado")
+        #writeLog(log_path, message=f"Estimación PDD {item_id}.xlsx --- Creado")
         del ollama
         break
 
