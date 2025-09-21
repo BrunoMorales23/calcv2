@@ -22,12 +22,15 @@ def initializeScripts():
 
     return work_queue #log_path
 
-def wqUpload(work_queue, file_name, file_path):
+def wqUpload(work_queue, file_name, file_path, handler):
 
     print(f"Archivo actual: {settings.inputPath}{file_name}")
     queue_id = file_name.replace(".pdf","")
     #work_queue.enqueue(Node(path=file_path ,id=queue_id))
-    workQueue.objects.create(id_value=queue_id, path_value=file_path)
+
+    #Handler nos permite poder utilizar "Ejecutar Casos Pendientes" sin duplicar la generación de valores en BBDD
+    if handler != False:
+        workQueue.objects.create(id_value=queue_id, path_value=file_path)
     new_item = {"path":file_path ,"id":queue_id}
     work_queue.append(new_item)
     print(f"Item con ID: {queue_id} cargado en cola.")

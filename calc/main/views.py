@@ -68,7 +68,7 @@ def home(request):
                         fs = FileSystemStorage()
                         file_name = fs.save(archivo.name, archivo)
                         file_path = fs.path(file_name)
-                        request.session["work_queue"] = wqUpload(request.session["work_queue"], file_name, file_path)
+                        request.session["work_queue"] = wqUpload(request.session["work_queue"], file_name, file_path, True)
                     request.session["bbdd_content"] = list(workQueue.objects.all().values("id_value", "status", "log").order_by('-id'))
                     print(len(request.session["work_queue"]))
                 return redirect("home")
@@ -85,9 +85,15 @@ def home(request):
                 request.session["llama_operation_flag"] = True
 
                 return redirect("home")
-            case _:
+            case "EjecutarPendientes":
+                request.session["bbdd_pending_items"] = list(workQueue.objects.filter(status="Pendiente").values("id_value", "path_value"))
+                print(request.session["bbdd_pending_items"])
+                for item in request.session["bbdd_pending_items"]:
+                    request.session["work_queue"] = wqUpload(request.session["work_queue"], item["id_value"], item["path_value"], False)
+                request.session["llama_operation_flag"] = True
                 return redirect("home")
-            
+            case _:
+                return redirect("home") 
     else:
         return render(request, "home.html")
     
@@ -112,5 +118,7 @@ def startUpVars(request):
         request.session["llama_result"] = None
     if "bbdd_content" not in request.session:
         request.session["bbdd_content"] = list(workQueue.objects.all().values("id_value", "status", "log").order_by('-id'))
+    if "bbdd_pending_items" not in request.session:
+        request.session["bbdd_pending_items"] = None
     print("--- Session Variables Initialized ---")
     
