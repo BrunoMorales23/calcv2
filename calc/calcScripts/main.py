@@ -14,8 +14,9 @@ def initializeScripts():
     sys.modules['tarfile'] = None
     sys.modules['pickle'] = None
     settings.init()
-    work_queue = queue.Queue()
+    #work_queue = queue.Queue()
     #log_path = setLog()
+    work_queue = []
 
     return work_queue #log_path
 
@@ -23,9 +24,13 @@ def wqUpload(work_queue, file_name, file_path):
 
     print(f"Archivo actual: {settings.inputPath}{file_name}")
     queue_id = file_name.replace(".pdf","")
-    work_queue.enqueue(Node(path=file_path ,id=queue_id))
+    #work_queue.enqueue(Node(path=file_path ,id=queue_id))
     workQueue.objects.create(id_value=queue_id, path_value=file_path)
+    new_item = {"path":file_path ,"id":queue_id}
+    work_queue.append(new_item)
     print(f"Item con ID: {queue_id} cargado en cola.")
+
+    return work_queue
 
 #Step 1
 def ocrExecution(item_id, item_path):
