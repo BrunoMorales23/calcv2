@@ -4,8 +4,6 @@ from .settings import *
 from .initialize.queue import *
 from .log import *
 from .llama import *
-#from gemini import *
-#import re
 import sys
 from openpyxl import load_workbook
 import re
@@ -17,86 +15,48 @@ def initializeScripts():
     sys.modules['pickle'] = None
     settings.init()
     work_queue = queue.Queue()
-    log_path = setLog()
-    return work_queue, log_path
+    #log_path = setLog()
 
-def wqUpload(work_queue, log_path, file_name, file_path):
-    #ollama = llama.Llama()
-    #files = getDirContent(settings.inputPath)
+    return work_queue #log_path
 
-    #for file in files:
+def wqUpload(work_queue, file_name, file_path):
+
     print(f"Archivo actual: {settings.inputPath}{file_name}")
-    #current_dir = os.path.join(settings.inputPath, file)
-
     queue_id = file_name.replace(".pdf","")
     work_queue.enqueue(Node(path=file_path ,id=queue_id))
     workQueue.objects.create(id_value=queue_id, path_value=file_path)
-    writeLog(log_path, message=f"Item con ID: {queue_id} cargado en cola.")
+    print(f"Item con ID: {queue_id} cargado en cola.")
 
+#Step 1
+def ocrExecution(item_id, item_path):
 
-def llamaOperation(work_queue):   
-    while work_queue.size() != 0:
-        current_item = work_queue.peek()
-        item_path = current_item.path
-        item_id = current_item.id
+    item_content = pdfToText(settings.tesseractPath, settings.popplerPath, item_path)
 
-        item_content = pdfToText(settings.tesseractPath, settings.popplerPath, item_path)
-        print("--- OCR Run Finished ---")
+    print("--- OCR Run Finished ---")
+    workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Pendiente").update(log="Inicializando Ejecución",status="Ejecutando")
 
+    return item_content, 2
 
-        workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Pendiente").update(log="Inicializando Ejecución",status="Ejecutando")
+#Step 2
+def llamaExecution(item_id, item_path, item_content):
+    ollama = llama.Llama(content=item_content)
+    llama_template = ollama.getTemplate(settings.promptBase)
+    llama_result = ollama.executePrompt(str(llama_template), item_content)
 
-        #LLama
-        #------------------------------------------------------------
-        ollama = llama.Llama(content=item_content)
-        llama_template = ollama.getTemplate(settings.promptBase)
-        llama_result = ollama.executePrompt(str(llama_template), item_content)
-        print(f"{item_id}--- Llama Run Finished ---")
-        workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Ejecutando").update(log="Finalizado el Análisis por IA")
-        #writeLog(log_path, message=llama_result)
+    print(f"{item_id}--- Llama Run Finished ---")
+    workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Ejecutando").update(log="Finalizado el Análisis por IA")
+
+    try:
         if os.path.exists(item_path):
             os.remove(item_path)
-            #crear lógica de excepción
-
-        #llama_result = setEstimation("1", llama_result)
-        #writeLog(log_path, message=llama_result)
-        #llama_result = setEstimation("2", llama_result)
-        #writeLog(log_path, message=llama_result)
-
-        writeOutput(llama_result, item_id)
-        #current_bbdd_item = workQueue.objects.filter(id_value=item_id, path_value=item_path, status=)
-        workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Ejecutando").update(log="Exportación de datos Completada", status="Completado")
-        #writeLog(log_path, message=f"Estimación PDD {item_id}.xlsx --- Creado")
-        del ollama
-        break
-
-    return llama_result
-
-def setEstimation(pathPrompt, content):
-    if pathPrompt == "1":
-        pathPrompt = settings.estimation_prompt
-    elif pathPrompt == "2":
-        pathPrompt = settings.horas_prompt
-    ollama = llama.Llama(content=content)
-    with open(pathPrompt, "r", encoding="utf-8") as f:
-        queryValue = f.read()
-        ollama.modifyQuery(queryValue)
-    llama_template = ollama.getTemplate(settings.estimation_prompt)
-    llama_result = ollama.executePrompt(str(llama_template) + queryValue, content)
+    except Exception as e:
+        print(f"No se pudo eliminar el documento con path: {item_path}. Excepción: {e}")
+        pass
     del ollama
-    return llama_result
+    return llama_result, 3
 
-
-#Se separan estas funciones a fin de poder ser utilizadas en casos X desde views.py
-def setLog():
-    current_log_path = initialize.createDir(settings.logsPath)
-    current_log = logs.createNewLog(current_log_path)
-    return current_log
-
-def writeLog(current_log, message):
-    logs.writeLogValue(current_log, message)
-
-def writeOutput(llama_result, queue_itemID):
+#Step 3
+def writeOutput(llama_result, item_id, item_path):
 
     current_row = 3
     current_value = 0
@@ -135,4 +95,36 @@ def writeOutput(llama_result, queue_itemID):
         current_row += 1
         current_value += 1
 
-    workBook.save(f"Estimación PDD {queue_itemID}.xlsx")
+    workBook.save(f"Estimación PDD {item_id}.xlsx")
+    workQueue.objects.filter(id_value=item_id, path_value=item_path, status="Ejecutando").update(log="Exportación de datos Completada", status="Completado")
+    return 0
+
+def getCurrentItem(log, status):
+    return list(workQueue.objects.filter(
+        log=log, status=status
+    ).values("id_value", "status", "log", "updated_at").order_by("-updated_at"))
+
+#Se separan estas funciones a fin de poder ser utilizadas en casos X desde views.py
+# def setLog():
+#     current_log_path = initialize.createDir(settings.logsPath)
+#     current_log = logs.createNewLog(current_log_path)
+#     return current_log
+
+# def writeLog(current_log, message):
+#     logs.writeLogValue(current_log, message)
+
+#Función para multi prompt
+# def setEstimation(pathPrompt, content):
+#     if pathPrompt == "1":
+#         pathPrompt = settings.estimation_prompt
+#     elif pathPrompt == "2":
+#         pathPrompt = settings.horas_prompt
+#     ollama = llama.Llama(content=content)
+#     with open(pathPrompt, "r", encoding="utf-8") as f:
+#         queryValue = f.read()
+#         ollama.modifyQuery(queryValue)
+#     llama_template = ollama.getTemplate(settings.estimation_prompt)
+#     llama_result = ollama.executePrompt(str(llama_template) + queryValue, content)
+#     del ollama
+
+#     return llama_result

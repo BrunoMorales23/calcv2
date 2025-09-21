@@ -15,8 +15,12 @@
             <br><br>
             <button type="submit" name="action" value="cargarWQ">Enviar</button>
         </form>
-        {% block content %} {% endblock %}
+            <form action="{% url 'home' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <button type="submit" name="action" value="iniciar">Procesar</button>
+        </form>
     </div>
+    {% block content %} {% endblock %}
 
     <div>
         <table>
@@ -55,19 +59,11 @@
                 <td>{{q.id_value}}</td>
                 <td>{{q.status}}</td>
                 <td>{{q.log}}</td>
+                <td>{{q.updated_at}}</td>
             </tr>
         </table>
     </div>
     {% endfor %}
-
-
-
-    <form action="{% url 'upload' %}" method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <input type="file" name="archivo" accept=".pdf" multiple/>
-            <br><br>
-            <button type="submit" name="action" value="iniciar">Enviar</button>
-        </form>
 </body>
 
 </html>
