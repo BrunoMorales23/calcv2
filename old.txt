@@ -42,3 +42,8 @@
                                                     request.session["item_path"])
                         request.session["current_task_id"] = task.id
                         return redirect("home")
+
+
+#from .tasks import run_llama, run_ocr, run_xlsx_phase
+#from django.http import JsonResponse
+#from celery.result import AsyncResult

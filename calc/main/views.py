@@ -2,9 +2,7 @@ from django.shortcuts import render, redirect
 from django.core.files.storage import FileSystemStorage
 from calcScripts.main import *
 from django.conf import settings as django_settings
-from .tasks import run_llama, run_ocr, run_xlsx_phase
-#from django.http import JsonResponse
-#from celery.result import AsyncResult
+from django.http import JsonResponse
 
 request_flush_required = True
 
@@ -17,6 +15,7 @@ def home(request):
     startUpVars(request)
     if request.method == "GET":
         if request.session["llama_operation_flag"] == True:
+                button_hide(request, True)
                 match request.session["llama_operation_step"]:
 
                     case 0:
@@ -26,8 +25,9 @@ def home(request):
                             current_item = work_queue.pop(0)
                         except Exception as e:
                             print(f"Excepción encontrada: {e}")
-                            request.session["llama_operation_flag"] == False
+                            request.session["llama_operation_flag"] = False
                             print(request.session["llama_operation_flag"])
+                            button_hide(request, False)
                             return render(request, "home.html")
                         request.session["item_path"] = current_item["path"]
                         request.session["item_id"] = current_item["id"]
@@ -60,9 +60,7 @@ def home(request):
             request.session["work_queue"] = initializeScripts()
             request.session["initialize_flag"] = False
         request.session["bbdd_content"] = list(workQueue.objects.all().values("id_value", "status", "log").order_by('-id'))
-        match request.session["llama_operation_step"]:
-                case 1,2,3:
-                    return redirect("home")
+        button_hide(request, False)
         return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
     
     elif request.method == "POST":
@@ -133,6 +131,12 @@ def startUpVars(request):
     if "current_task_id" not in request.session:
         request.session["current_task_id"] = None
     print("--- Session Variables Initialized ---")
+
+def button_hide(request, hide):
+    keys = ["cargarWQ", "iniciar", "vaciarWQ", "EjecutarPendientes", "inputButton"]
+    status = {key: hide for key in keys}
+    return JsonResponse(status)
+
 
 # def checkTaskStatus(request, task_id=None):
 #     if not task_id:

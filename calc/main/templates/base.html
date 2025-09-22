@@ -11,7 +11,7 @@
         <p>Bienvenido al automatizador. Por favor, disponga del PDD de su proceso a automatizar.</p>
           <form action="{% url 'home' %}" method="post" enctype="multipart/form-data" id="uploadForm">
             {% csrf_token %}
-            <input type="file" name="archivo" accept=".pdf" multiple id="fileInput"/>
+            <input type="file" name="archivo" accept=".pdf" multiple id="fileInput" value="inputButton"/>
             <br><br>
             <button type="submit" name="action" value="cargarWQ">Enviar</button>
         </form>

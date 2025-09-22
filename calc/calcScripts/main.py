@@ -16,11 +16,9 @@ def initializeScripts():
     sys.modules['tarfile'] = None
     sys.modules['pickle'] = None
     settings.init()
-    #work_queue = queue.Queue()
-    #log_path = setLog()
     work_queue = []
 
-    return work_queue #log_path
+    return work_queue
 
 def wqUpload(work_queue, file_name, file_path, handler):
 
