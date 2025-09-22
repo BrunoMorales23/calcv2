@@ -1,0 +1,44 @@
+                    case 1:
+                        print("CASE 1")
+                        request.session["item_content"], request.session["llama_operation_step"] = ocrExecution(request.session["item_id"], request.session["item_path"])
+                        request.session["bbdd_current_item"] = getCurrentItem(log="Inicializando Ejecución", status="Ejecutando")
+                        #return redirect("home")
+                        return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
+                    case 2:
+                        print("CASE 2")
+                        #request.session["llama_result"], request.session["llama_operation_step"] = llamaExecution(request.session["item_id"], request.session["item_path"], request.session["item_content"])
+                        #request.session["bbdd_current_item"] = getCurrentItem(log="Finalizado el Análisis por IA", status="Ejecutando")
+                        #return redirect("home")
+                        #return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
+                    case 3:
+                        print("CASE 3")
+                        request.session["llama_operation_step"] = writeOutput(request.session["llama_result"], request.session["item_id"], request.session["item_path"])
+                        request.session["bbdd_current_item"] = getCurrentItem(log="Exportación de datos Completada", status="Completado")
+                        #return redirect("home")
+                        return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
+                        
+
+                        #current_item = request.session["work_queue"].peek()
+
+
+                        case 1:
+                        print("CASE 1")
+                        task = run_ocr(request.session["item_id"],
+                                        request.session["item_path"])
+                        return redirect("home")
+                    
+                    case 2:
+                        print("CASE 2")
+                        task = run_llama.delay(request.session["item_id"],
+                                               request.session["item_path"],
+                                               request.session["item_content"])
+                        request.session["current_task_id"] = task.id
+                        return redirect("home")
+
+                    case 3:
+                        print("CASE 3")
+                        task = run_xlsx_phase.delay(request.session["llama_result"],
+                                                    request.session["item_id"],
+                                                    request.session["item_path"])
+                        request.session["current_task_id"] = task.id
+                        return redirect("home")
