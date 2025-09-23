@@ -7,43 +7,37 @@ class Llama:
         self.content = content
         self.query = """
 Eres un desarrollador semi senior de RPA con experiencia en Blue Prism.
-Tu tarea es analizar un documento de texto que contiene instrucciones o procesos y generar un resumen paso a paso de todas las acciones ejecutables en Blue Prism.
+Tu tarea es analizar un documento de texto que contiene instrucciones o procesos y generar un resumen paso a paso de todas las acciones ejecutables en Blue Prism, asignando también un rango de horas estimadas de desarrollo.
 
 Reglas a seguir:
 
-Extraer solo pasos accionables: ignora explicaciones generales, objetivos, teoría o cualquier información que no represente un paso concreto dentro del proceso.
+1. Extraer solo pasos accionables: ignora explicaciones generales, objetivos, teoría o cualquier información que no represente un paso concreto dentro del proceso.
+2. Numerar los pasos de manera secuencial.
+3. Asignar un nivel de complejidad del 1 al 5:
+   - Nivel 1: lógica posible de resolver dentro de Blue Prism (cálculos generales, uso de Excel, envío de correos y reportería).
+   - Nivel 2: mapeo de interfaces Web o aplicativos Web. Trabajos con SAP con menos de 2 transacciones, envío de correos y reportería.
+   - Nivel 3: trabajos con SAP con más de 3 transacciones.
+   - Nivel 4: lógica avanzada, muchas reglas de negocio, mucho trabajo de SAP.
+   - Nivel 5: creación de code stages personalizados para la resolución de problemas específicos.
+4. Para cada paso asigna un rango de horas estimadas en función de su nivel de complejidad:
+   - Nivel 1: 1 a 3 horas
+   - Nivel 2: 4 a 8 horas
+   - Nivel 3: 8 a 24 horas
+   - Nivel 4: 24 a 48 horas
+   - Nivel 5: 48 a 80 horas
+5. Si un paso contiene múltiples sub-acciones dentro de la misma instrucción, asigna el valor superior del rango.
+6. Si un paso es simple y directo, asigna el valor inferior del rango.
+7. Mantén la numeración, la descripción clara del paso y su nivel de complejidad.
+8. Añade al final de cada paso la estimación en horas.
 
-Numerar los pasos de manera secuencial.
+Formato de salida esperado:
 
-Asignar un nivel de complejidad a cada paso del 1 al 5:
+Paso 1 [Nivel 2]: Descripción clara del paso — Estimación: 6 horas  
+Paso 2 [Nivel 4]: Descripción clara del paso — Estimación: 30 horas  
 
-1 = muy sencillo
+Input: {content}  
+Output esperado: lista de pasos numerados con nivel de complejidad y estimación de horas, siguiendo estrictamente el formato indicado.
 
-5 = muy complejo
-La calificación debe reflejar la perspectiva de un desarrollador semi senior.
-
-Formato de salida:
-Paso 1 [Nivel 2]: Descripción clara del paso
-Paso 2 [Nivel 4]: Descripción clara del paso
-
-Claridad y concisión: cada paso debe ser suficientemente detallado para que otro desarrollador semi senior pueda replicarlo.
-
-Ignorar lo irrelevante: no incluir comentarios, notas o información adicional que no sean pasos concretos.
-
-Input: {self.content}
-Output esperado: lista de pasos numerados con su nivel de complejidad, siguiendo estrictamente el formato indicado.
-
-Considerar para la dificultad:
-
-Nivel 1: lógica posible de resolver dentro de Blue Prism (cálculos generales, uso de Excel, envío de correos y reportería).
-
-Nivel 2: mapeo de interfaces Web o aplicativos Web. Trabajos con SAP con menos de 2 transacciones, envío de correos y reportería.
-
-Nivel 3: trabajos con SAP con más de 3 transacciones.
-
-Nivel 4: lógica avanzada, muchas reglas de negocio, mucho trabajo de SAP.
-
-Nivel 5: creación de code stages personalizados para la resolución de problemas específicos.
 """
 
     def getTemplate(self, template_path):
@@ -52,9 +46,9 @@ Nivel 5: creación de code stages personalizados para la resolución de problema
         return template_value
 
     def executePrompt(self, template_value, item_content):
-        prompt = ChatPromptTemplate.from_template(template_value)
+        prompt = ChatPromptTemplate.from_template(self.query)
         chain = prompt | self.model
-        result = chain.invoke({"content": item_content, "question": self.query})
+        result = chain.invoke({"content": item_content})
         return result
     
     def modifyQuery(self, query):

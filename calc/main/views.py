@@ -45,6 +45,7 @@ def home(request):
                         print("CASE 2")
                         request.session["llama_result"], request.session["llama_operation_step"] = llamaExecution(request.session["item_id"], request.session["item_path"], request.session["item_content"])
                         request.session["bbdd_current_item"] = getCurrentItem(log="Finalizado el Análisis por IA", status="Ejecutando")
+                        print(request.session["llama_result"])
                         return redirect("home")
                         #return render(request, "home.html", {"wq": request.session["bbdd_content"], "currentItem": request.session["bbdd_current_item"]})
                     case 3:
